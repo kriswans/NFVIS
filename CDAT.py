@@ -17,6 +17,8 @@ from Cisco_NFV_API_SDK import NFVIS_URNs as nfvis_urns
 from Cisco_NFV_API_SDK import SDWAN_API_Calls as sdwan_calls
 from Cisco_NFV_API_SDK import SDWAN_URNs as sdwan_urns
 from pprint import pprint as pp
+from os import listdir
+import json
 import sys
 import requests
 import getpass
@@ -84,8 +86,24 @@ def cli(args):
         method,key,name_ip,setting=(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])
     else:
         method,key,name_ip=(sys.argv[1],sys.argv[2],sys.argv[3])
-    username = input("Username: ")
-    password = getpass.getpass()
+    if 'creds.json' not in listdir():
+        username = input("Username: ")
+        password = getpass.getpass()
+        creds={name_ip:{username:password}}
+        with open('creds.json','w') as f:
+            json.dump(creds,f)
+    with open ('creds.json','r') as f:
+        creds=json.load(f)
+
+    if name_ip not in creds.keys():
+        username = input("Username: ")
+        password = getpass.getpass()
+        creds.update({name_ip:{username:password}})
+        with open('creds.json','w') as f:
+            json.dump(creds,f)
+    else:
+        username,password=(list(creds[name_ip].keys())[0],list(creds[name_ip].values())[0])
+
     url='https://%s'%name_ip
     if method is 'g':
         uri,header=nfvis_urns.get(key,url)
