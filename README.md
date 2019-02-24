@@ -17,22 +17,25 @@ NFVIS 3.10.2
 
 ## Usage
 
-Interactive Mode
+### Interactive Mode
 
 ```
 usage: CDAT.py
 ```
 
-Non-Interactive Mode
+### Non-Interactive Mode
 
 ```
 usage: CDAT.py [method] [option] [ip-address] [file.xml]
+
+usage: CDAT.py [method] [option] [bulk] [file.xml]
 ```
 
 ## Operation
 
-###Interactive Mode
-
+### Interactive Mode
+Interactive mode is a menu driven experience. The user should
+select an option that corresponds with the desired task.
 ```
 CDAT.py 
 
@@ -99,9 +102,12 @@ Platform Details:
 
  
 ```
+Deployment of bridges, networks, and VNF's in interactive mode require that
+bridge.xml, network.xml, and vnf.xml files be present in the XML directory.
+The program will rewrite these files for the POST operation to NFVIS based
+on user input.
 
-
-###Non-Interactive Mode
+### Non-Interactive Mode
 
 Non-Interactive mode supports the following arguments:
 ```
@@ -126,10 +132,18 @@ of the bridge, network, or VNF. Examples of the templates can be found
 in the XML folder.
 
 If the creds.json file is not present in the working directory the user
-will be prompted to enter device credentials. The program will then store
-the ip address and credentials in the creds.json file for future use providing
-a true non interactive experience. The creds.json file has been added to
+will be prompted to enter device credentials. The program will then create 
+the creds.json file in the working directory. The IP address and credentials
+entered will be stored in the creds.json file for future use providing a 
+true non interactive experience. Alternatively, the creds.json file can be 
+prepopulated for bulk automation. The creds.json file has been added to
 .gitignore to ensure it is not tracked by git.
+
+Non-interactive mode supports the use of the "bulk" argument. If the "bulk"
+argument is used instead of an IP address then the requested operation will
+be run on all devices that exist within creds.json.
+
+
 
 **Examples**
 
@@ -166,7 +180,7 @@ network:networks
 ```
 
 ```
-python3 CDAT.py g deployments 10.10.10.10
+CDAT.py g deployments 10.10.10.10
 
 API Response Code: 200 :
 
@@ -192,7 +206,7 @@ vmlc:deployments
 ```
 **POST:**
 ```
-CDAT.py p deployments 10.10.10.10 ASAv_ENCS.xml 
+CDAT.py p deployments 10.10.10.10 XML/ASAv_ENCS.xml 
 Username: admin
 Password: 
 API Response Code: 201 :
@@ -207,6 +221,39 @@ JSON Reponse:
 VNF deployment successful
 
 ```
+```
+CDAT.py p networks bulk XML/network.xml 
+API Response Code: 201 :
+
+Request URI: https://10.10.10.10/api/config/networks
+
+JSON Reponse:
+
+<Response [201]>
+
+
+Deployment successful
+API Response Code: 201 :
+
+Request URI: https://10.10.10.11/api/config/networks
+
+JSON Reponse:
+
+<Response [201]>
+
+
+Deployment successful
+API Response Code: 201 :
+
+Request URI: https://10.10.10.12/api/config/networks
+
+JSON Reponse:
+
+<Response [201]>
+
+
+Deployment successful
+```
 **DELETE:**
 ```
 CDAT.py d deployments 10.10.10.10 ASAv
@@ -218,5 +265,22 @@ API Status Code: 204
 
 VNF deletion successful
 
+```
+```
+CDAT.py d bridge bulk test-br
 
+https://10.10.10.10/api/config/bridges/bridge/test-br 
+API Status Code: 204
+
+Deletion successful
+
+https://10.10.10.11/api/config/bridges/bridge/test-br 
+API Status Code: 204
+
+Deletion successful
+
+https://10.10.10.12/api/config/bridges/bridge/test-br 
+API Status Code: 204
+
+Deletion successful
 ```
